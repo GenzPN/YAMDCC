@@ -104,12 +104,15 @@ internal static class Program
             tDown = -1,
             chargeLim = -1,
             perfMode = -2,  // -1 is used as "default" in fan profile settings
-            keyLight = -1;
+            keyLight = -1,
+            refreshRate = -1;
 
         string fanName = string.Empty,
             profName = string.Empty,
             confPath = Paths.CurrentConfV2,
             cfgAuthor = string.Empty;
+
+        bool autoRefreshRate = false;
 
         #region Parse actual commands and arguments
         ConsoleColor fgColor = Console.ForegroundColor;
@@ -127,6 +130,7 @@ internal static class Program
                 case "chargelim":
                 case "perfmode":
                 case "keylight":
+                case "refreshrate":
                 case "C":
                 case "config":
                 case "author":
@@ -262,6 +266,18 @@ internal static class Program
                         Console.ForegroundColor = fgColor;
                         return;
                     }
+                    break;
+                case "refreshrate":
+                    if (!int.TryParse(arg, out refreshRate))
+                    {
+                        Console.ForegroundColor = ConsoleColor.Red;
+                        Console.WriteLine(Strings.GetString("errArgParse", verb));
+                        Console.ForegroundColor = fgColor;
+                        return;
+                    }
+                    break;
+                case "autorefreshrate":
+                    autoRefreshRate = true;
                     break;
                 case "C":
                 case "config":
@@ -499,6 +515,25 @@ internal static class Program
                 return;
             }
             IPCClient.PushMessage(new ServiceCommand(Command.SetKeyLightBright, keyLight));
+        }
+
+        // -refreshrate
+        if (refreshRate != -1 && ConnectSvc())
+        {
+            if (refreshRate < 30 || refreshRate > 300)
+            {
+                Console.ForegroundColor = ConsoleColor.Red;
+                Console.WriteLine($"ERROR: Invalid refresh rate {refreshRate} Hz (must be between 30-300 Hz)");
+                Console.ForegroundColor = fgColor;
+                return;
+            }
+            IPCClient.PushMessage(new ServiceCommand(Command.SetRefreshRate, refreshRate));
+        }
+
+        // -autorefreshrate
+        if (autoRefreshRate && ConnectSvc())
+        {
+            IPCClient.PushMessage(new ServiceCommand(Command.SetAutoRefreshRate, -1)); // -1 = toggle
         }
 
         // -author

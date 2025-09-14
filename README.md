@@ -55,6 +55,9 @@ A fast, lightweight MSI Center alternative and fan control utility for MSI lapto
 - **Charging threshold:** This program can limit how much your laptop's battery
   charges to, which can help reduce battery degradation, especially if you
   leave your laptop plugged in all the time.
+- **Auto refresh rate:** Automatically switch screen refresh rates based on power
+  state (AC power vs battery) to optimize battery life and performance. Configure
+  different refresh rates for AC and battery modes.
 - **Lightweight:** YAMDCC takes up less than ten megabytes of disk space when
   installed, and is designed to be light on your laptop's CPU.
 - **Configurable:** Almost all settings (including those not accessible through

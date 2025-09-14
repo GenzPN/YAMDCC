@@ -148,6 +148,17 @@ public enum Response
     /// </para>
     /// </remarks>
     ConfLoaded,
+    /// <summary>
+    /// The result of a <see cref="Command.GetRefreshRate"/> command.
+    /// </summary>
+    /// <remarks>
+    /// <para>
+    /// This response's <see cref="ServiceResponse.Value"/> field includes
+    /// the following data as an <see langword="int"/><br/>
+    /// • RefreshRate: The current screen refresh rate in Hz.
+    /// </para>
+    /// </remarks>
+    RefreshRate,
 }
 
 /// <summary>

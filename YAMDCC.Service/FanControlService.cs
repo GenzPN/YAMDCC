@@ -210,6 +210,13 @@ internal sealed class FanControlService : ServiceBase
                     CooldownTimer.Start();
                 }
                 break;
+            case PowerBroadcastStatus.PowerStatusChange:
+                // Power state changed (AC/battery) - apply refresh rate if auto mode enabled
+                if (Config?.AutoRefreshRateEnabled == true)
+                {
+                    ApplyRefreshRateConfig();
+                }
+                break;
         }
         return true;
     }
@@ -433,6 +440,48 @@ internal sealed class FanControlService : ServiceBase
                 }
                 break;
             }
+            case Command.GetRefreshRate:
+                parseSuccess = true;
+                sendSuccessMsg = false;
+                cmdSuccess = GetRefreshRate(id);
+                break;
+            case Command.SetRefreshRate:
+            {
+                if (args.Length == 1 && args[0] is int refreshRate)
+                {
+                    parseSuccess = true;
+                    cmdSuccess = SetRefreshRate(refreshRate);
+                }
+                break;
+            }
+            case Command.SetAutoRefreshRate:
+            {
+                if (args.Length == 1 && args[0] is int enable)
+                {
+                    parseSuccess = true;
+                    if (enable == -1)
+                    {
+                        Config.AutoRefreshRateEnabled = !Config.AutoRefreshRateEnabled;
+                    }
+                    else if (enable == 0)
+                    {
+                        Config.AutoRefreshRateEnabled = false;
+                    }
+                    else if (enable == 1)
+                    {
+                        Config.AutoRefreshRateEnabled = true;
+                    }
+                    else
+                    {
+                        parseSuccess = false;
+                    }
+                    if (parseSuccess)
+                    {
+                        cmdSuccess = ApplyRefreshRateConfig();
+                    }
+                }
+                break;
+            }
             default:    // Unknown command
                 Log.Error(Strings.GetString("errBadCmd", cmd));
                 break;
@@ -600,6 +649,13 @@ internal sealed class FanControlService : ServiceBase
         {
             success = false;
         }
+
+        // Apply auto refresh rate settings
+        if (!ApplyRefreshRateConfig())
+        {
+            success = false;
+        }
+
         return success;
     }
 
@@ -937,5 +993,44 @@ internal sealed class FanControlService : ServiceBase
             }
         }
         return prof;
+    }
+
+    private bool GetRefreshRate(int clientId)
+    {
+        int refreshRate = DisplayUtils.GetCurrentRefreshRate();
+        if (refreshRate > 0)
+        {
+            IPCServer.PushMessage(new ServiceResponse(
+                Response.RefreshRate, refreshRate), clientId);
+            return true;
+        }
+        return false;
+    }
+
+    private bool SetRefreshRate(int refreshRate)
+    {
+        if (refreshRate > 0)
+        {
+            Log.Info($"Setting refresh rate to {refreshRate} Hz");
+            DisplayUtils.SetRefreshRate(refreshRate);
+            return true;
+        }
+        return false;
+    }
+
+    private bool ApplyRefreshRateConfig()
+    {
+        if (Config?.AutoRefreshRateEnabled == true)
+        {
+            bool isOnBattery = DisplayUtils.IsOnBattery();
+            int targetRefreshRate = isOnBattery ? Config.RefreshRateBattery : Config.RefreshRateAC;
+            
+            if (targetRefreshRate > 0)
+            {
+                Log.Info($"Auto refresh rate: switching to {targetRefreshRate} Hz (on {(isOnBattery ? "battery" : "AC power")})");
+                return SetRefreshRate(targetRefreshRate);
+            }
+        }
+        return true;
     }
 }

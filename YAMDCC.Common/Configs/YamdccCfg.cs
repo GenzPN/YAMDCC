@@ -133,6 +133,26 @@ public sealed class YamdccCfg
     public bool KeySwapEnabled { get; set; }
 
     /// <summary>
+    /// Enable automatic screen refresh rate changes based on power state.
+    /// </summary>
+    [XmlElement]
+    public bool AutoRefreshRateEnabled { get; set; }
+
+    /// <summary>
+    /// The refresh rate to use when on AC power (Hz).
+    /// Set to 0 to disable AC refresh rate change.
+    /// </summary>
+    [XmlElement]
+    public int RefreshRateAC { get; set; }
+
+    /// <summary>
+    /// The refresh rate to use when on battery power (Hz).
+    /// Set to 0 to disable battery refresh rate change.
+    /// </summary>
+    [XmlElement]
+    public int RefreshRateBattery { get; set; }
+
+    /// <summary>
     /// Parses a YAMDCC config XML and returns a
     /// <see cref="YamdccCfg"/> object.
     /// </summary>
@@ -283,6 +303,33 @@ public sealed class YamdccCfg
         else if (ChargeLim > 100)
         {
             ChargeLim = 100;
+        }
+
+        // Validate refresh rate settings
+        if (RefreshRateAC < 0)
+        {
+            RefreshRateAC = 0;
+        }
+        else if (RefreshRateAC > 0 && RefreshRateAC < 30)
+        {
+            RefreshRateAC = 30; // Minimum reasonable refresh rate
+        }
+        else if (RefreshRateAC > 300)
+        {
+            RefreshRateAC = 300; // Maximum reasonable refresh rate
+        }
+
+        if (RefreshRateBattery < 0)
+        {
+            RefreshRateBattery = 0;
+        }
+        else if (RefreshRateBattery > 0 && RefreshRateBattery < 30)
+        {
+            RefreshRateBattery = 30; // Minimum reasonable refresh rate
+        }
+        else if (RefreshRateBattery > 300)
+        {
+            RefreshRateBattery = 300; // Maximum reasonable refresh rate
         }
 
         // All other values are considered to be valid; return true.

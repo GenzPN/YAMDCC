@@ -205,6 +205,39 @@ public enum Command
     /// </para>
     /// </remarks>
     SetPerfMode,
+    /// <summary>
+    /// Gets the current screen refresh rate in Hz.
+    /// </summary>
+    /// <remarks>
+    /// <para>This command expects no arguments.</para>
+    /// <para>
+    /// The result is sent to the caller as a
+    /// <see cref="Response.RefreshRate"/> message.
+    /// </para>
+    /// </remarks>
+    GetRefreshRate,
+    /// <summary>
+    /// Sets the screen refresh rate to the specified value in Hz.
+    /// </summary>
+    /// <remarks>
+    /// <para>
+    /// This command expects the following argument as
+    /// an <see langword="int"/>:<br/>
+    /// • RefreshRate: The refresh rate in Hz to set.
+    /// </para>
+    /// </remarks>
+    SetRefreshRate,
+    /// <summary>
+    /// Enables or disables automatic refresh rate changes based on power state.
+    /// </summary>
+    /// <remarks>
+    /// <para>
+    /// This command expects the following argument as
+    /// an <see langword="int"/>:<br/>
+    /// • Enable: 1 to enable auto refresh rate, 0 to disable, -1 to toggle.
+    /// </para>
+    /// </remarks>
+    SetAutoRefreshRate,
 }
 
 /// <summary>
