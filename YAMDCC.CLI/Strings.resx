@@ -185,6 +185,10 @@ Fan profile management:
 		mode.
   -keylight	Sets the keyboard backlight on supported laptops to the
 		specified brightness (0-3).
+  -refreshrate	Sets the screen refresh rate to the specified value in Hz
+		(30-300 Hz range).
+  -autorefreshrate	Toggles automatic refresh rate changes based on power
+		state (AC power vs battery).
 
 Config management:
   -C, -config	Make changes to the specified config
