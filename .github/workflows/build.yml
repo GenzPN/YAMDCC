@@ -16,11 +16,11 @@ jobs:
       matrix:
         config: [Debug, Release]
 
-    runs-on: windows-2025
+    runs-on: windows-latest
 
     steps:
     - name: Checkout repository
-      uses: actions/checkout@v1
+      uses: actions/checkout@v4
 
     - name: Get short commit hash
       uses: benjlevesque/short-sha@v3.0
@@ -48,7 +48,7 @@ jobs:
       run: msbuild.exe YAMDCC.sln /nologo /nr:false /p:DeployOnBuild=true /p:platform="Any CPU" /p:configuration="${{ matrix.config }}"
 
     - name: Copy LICENSE to build path
-      run: copy LICENSE.md YAMDCC.ConfigEditor\bin\${{ matrix.config }}\net48
+      run: Copy-Item LICENSE.md "YAMDCC.ConfigEditor\bin\${{ matrix.config }}\net48"
 
     - name: Compile installer
       run: Tools\InnoSetup\ISCC.exe /O+ "/DBuildConfig=${{ matrix.config }}" Installer/YAMDCC-Setup.iss
