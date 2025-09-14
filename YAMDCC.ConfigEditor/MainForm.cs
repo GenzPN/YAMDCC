@@ -53,6 +53,12 @@ internal sealed partial class MainForm : Form
 
     private bool GPUFan;
     private int Debug;
+#endregion
+
+    // Refresh rate auto-switch fields
+    private readonly Timer tmrRefreshRate;
+    private int lastRefreshRate = -1;
+    private string refreshRateMode = "Auto"; // "Auto", "60Hz", "144Hz"
     #endregion
 
     public MainForm()
@@ -147,9 +153,40 @@ internal sealed partial class MainForm : Form
             CommonConfig.SetAutoUpdateAsked(true);
         }
         DisableAll();
+
+        // Timer for refresh rate auto-switch
+        tmrRefreshRate = new Timer { Interval = 5000 };
+        tmrRefreshRate.Tick += (s, e) => RefreshRateTick();
+        tmrRefreshRate.Start();
     }
 
     #region Events
+
+    private void RefreshRateTick()
+    {
+        // Only act if Auto mode is selected
+        if (refreshRateMode == "Auto")
+        {
+            bool onBattery = YAMDCC.Common.DisplayUtils.IsOnBattery();
+            int targetHz = onBattery ? 60 : 144;
+            int currentHz = YAMDCC.Common.DisplayUtils.GetCurrentRefreshRate();
+            if (currentHz != targetHz)
+            {
+                YAMDCC.Common.DisplayUtils.SetRefreshRate(targetHz);
+                lastRefreshRate = targetHz;
+            }
+        }
+        else if (refreshRateMode == "60Hz" && lastRefreshRate != 60)
+        {
+            YAMDCC.Common.DisplayUtils.SetRefreshRate(60);
+            lastRefreshRate = 60;
+        }
+        else if (refreshRateMode == "144Hz" && lastRefreshRate != 144)
+        {
+            YAMDCC.Common.DisplayUtils.SetRefreshRate(144);
+            lastRefreshRate = 144;
+        }
+    }
     protected override void OnLoad(EventArgs e)
     {
         base.OnLoad(e);
